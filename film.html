@@ -1,0 +1,674 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>膜厚度计算器（含收缩计算）</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Segoe UI', 'Microsoft YaHei', sans-serif;
+        }
+        
+        body {
+            background: linear-gradient(135deg, #1a2980, #26d0ce);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #333;
+        }
+        
+        .container {
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+            width: 100%;
+            max-width: 900px;
+            overflow: hidden;
+        }
+        
+        header {
+            background: linear-gradient(120deg, #2c3e50, #1a2980);
+            color: white;
+            padding: 30px 40px;
+            text-align: center;
+            position: relative;
+        }
+        
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        header p {
+            font-size: 1.15rem;
+            opacity: 0.9;
+            max-width: 700px;
+            margin: 0 auto;
+            line-height: 1.6;
+        }
+        
+        .info-banner {
+            background: #e8f4fc;
+            padding: 15px;
+            text-align: center;
+            border-bottom: 2px solid #3498db;
+            font-size: 1.1rem;
+            color: #2c3e50;
+        }
+        
+        .info-banner i {
+            color: #e74c3c;
+            margin-right: 8px;
+        }
+        
+        .calculator {
+            padding: 30px 40px;
+        }
+        
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 30px;
+        }
+        
+        .input-group label {
+            font-size: 1.25rem;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: #2c3e50;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .input-container {
+            display: flex;
+            gap: 15px;
+        }
+        
+        input {
+            flex: 1;
+            padding: 16px 25px;
+            font-size: 1.3rem;
+            border: 3px solid #3498db;
+            border-radius: 12px;
+            outline: none;
+            transition: all 0.3s;
+        }
+        
+        input:focus {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 4px rgba(231, 76, 60, 0.2);
+        }
+        
+        button {
+            padding: 16px 35px;
+            font-size: 1.25rem;
+            font-weight: 700;
+            border: none;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+        
+        .calculate-btn {
+            background: linear-gradient(120deg, #2ecc71, #27ae60);
+            color: white;
+        }
+        
+        .reset-btn {
+            background: linear-gradient(120deg, #e74c3c, #c0392b);
+            color: white;
+        }
+        
+        button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 7px 15px rgba(0, 0, 0, 0.2);
+        }
+        
+        .error {
+            color: #e74c3c;
+            font-weight: 600;
+            margin-top: 15px;
+            font-size: 1.1rem;
+            display: none;
+        }
+        
+        .result-section {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 2px solid #e9ecef;
+            display: none;
+        }
+        
+        .result-section h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .film-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        .film-card {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            text-align: center;
+            box-shadow: 0 7px 20px rgba(0, 0, 0, 0.08);
+            transition: all 0.3s;
+            border-top: 5px solid #3498db;
+        }
+        
+        .film-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 12px 25px rgba(0, 0, 0, 0.15);
+        }
+        
+        .film-card h3 {
+            font-size: 1.4rem;
+            color: #2c3e50;
+            margin-bottom: 20px;
+        }
+        
+        .film-value {
+            font-size: 3rem;
+            font-weight: 800;
+            color: #e74c3c;
+            margin: 15px 0;
+            line-height: 1;
+        }
+        
+        .thickness-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 25px;
+        }
+        
+        .thickness-card {
+            background: #f0f7ff;
+            border-radius: 10px;
+            padding: 15px;
+            text-align: center;
+            width: 48%;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .thickness-card h4 {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+            color: #3498db;
+        }
+        
+        .thickness-value {
+            font-size: 1.8rem;
+            font-weight: 700;
+            color: #2c3e50;
+        }
+        
+        .shrink-details {
+            background: white;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+            border-left: 5px solid #2ecc71;
+        }
+        
+        .shrink-details h3 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .shrink-calc {
+            font-size: 1.3rem;
+            line-height: 1.6;
+            color: #2c3e50;
+            margin-bottom: 15px;
+        }
+        
+        .shrink-result {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: #e74c3c;
+            text-align: center;
+            margin-top: 15px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 10px;
+            border: 2px dashed #3498db;
+        }
+        
+        .total {
+            text-align: center;
+            font-size: 1.6rem;
+            font-weight: 800;
+            color: #2c3e50;
+            padding: 20px;
+            background: linear-gradient(120deg, #e8f4fc, #d6eaf8);
+            border-radius: 15px;
+        }
+        
+        .examples {
+            margin-top: 40px;
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 30px;
+            border: 2px solid #e9ecef;
+        }
+        
+        .examples h2 {
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 1.8rem;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .example-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+        }
+        
+        .example-card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        }
+        
+        .example-card h3 {
+            color: #e74c3c;
+            font-size: 1.3rem;
+            margin-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .example-card p {
+            font-size: 1.1rem;
+            color: #2c3e50;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+        
+        .example-card .result {
+            font-weight: 700;
+            color: #27ae60;
+            background: #f0f7ff;
+            padding: 10px;
+            border-radius: 8px;
+            margin-top: 10px;
+            font-size: 1.1rem;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 25px;
+            background: rgba(44, 62, 80, 0.9);
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 1.1rem;
+        }
+        
+        @media (max-width: 768px) {
+            header {
+                padding: 25px 20px;
+            }
+            
+            header h1 {
+                font-size: 2rem;
+            }
+            
+            .calculator {
+                padding: 30px 20px;
+            }
+            
+            .input-container {
+                flex-direction: column;
+            }
+            
+            .film-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .thickness-container {
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .thickness-card {
+                width: 100%;
+            }
+            
+            button {
+                width: 100%;
+            }
+        }
+        
+        /* 动画效果 */
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .result-section {
+            animation: fadeIn 0.6s ease-out;
+        }
+        
+        .film-card {
+            animation: fadeIn 0.5s ease-out;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1><i class="fas fa-calculator"></i> 燃料电池封接膜厚度计算器</h1>
+            <p>计算所需100、120和130厚度膜的数量组合（每张膜叠加后收缩8个单位）</p>
+        </header>
+        
+        <div class="info-banner">
+            <i class="fas fa-info-circle"></i> 每张膜叠加后会收缩8个单位厚度，计算结果将包含收缩前后的厚度
+        </div>
+        
+        <div class="calculator">
+            <div class="input-group">
+                <label for="target-thickness"><i class="fas fa-bullseye"></i> 目标厚度（收缩前）：</label>
+                <div class="input-container">
+                    <input type="number" id="target-thickness" placeholder="请输入目标厚度（如360）" min="0">
+                    <button class="calculate-btn" id="calculate-btn">
+                        <i class="fas fa-calculator"></i> 计算
+                    </button>
+                    <button class="reset-btn" id="reset-btn">
+                        <i class="fas fa-redo"></i> 重置
+                    </button>
+                </div>
+                <div class="error" id="error-message">
+                    目标厚度必须是10的倍数且不能为负数！
+                </div>
+            </div>
+            
+            <div class="result-section" id="result-section">
+                <h2><i class="fas fa-chart-bar"></i> 计算结果</h2>
+                
+                <div class="film-cards">
+                    <div class="film-card">
+                        <h3>100厚度膜</h3>
+                        <div class="film-value" id="result-100">0</div>
+                        <p>张</p>
+                        <p class="shrink-calc">每张有效厚度: 100 - 8 = 92</p>
+                    </div>
+                    
+                    <div class="film-card">
+                        <h3>120厚度膜</h3>
+                        <div class="film-value" id="result-120">0</div>
+                        <p>张</p>
+                        <p class="shrink-calc">每张有效厚度: 120 - 8 = 112</p>
+                    </div>
+                    
+                    <div class="film-card">
+                        <h3>130厚度膜</h3>
+                        <div class="film-value" id="result-130">0</div>
+                        <p>张</p>
+                        <p class="shrink-calc">每张有效厚度: 130 - 8 = 122</p>
+                    </div>
+                </div>
+                
+                <div class="thickness-container">
+                    <div class="thickness-card">
+                        <h4>收缩前总厚度</h4>
+                        <div class="thickness-value" id="original-thickness">0</div>
+                    </div>
+                    <div class="thickness-card">
+                        <h4>收缩后总厚度</h4>
+                        <div class="thickness-value" id="shrink-thickness">0</div>
+                    </div>
+                </div>
+                
+                <div class="shrink-details">
+                    <h3><i class="fas fa-compress-arrows-alt"></i> 收缩计算详情</h3>
+                    <div class="shrink-calc" id="shrink-calculation">
+                        收缩计算详情将显示在这里
+                    </div>
+                    <div class="shrink-result" id="shrink-result">
+                        收缩后厚度: 0
+                    </div>
+                </div>
+                
+                <div class="total" id="total-sheets">
+                    总张数：0
+                </div>
+            </div>
+            
+            <div class="examples">
+                <h2><i class="fas fa-lightbulb"></i> 计算示例</h2>
+                <div class="example-grid">
+                    <div class="example-card">
+                        <h3><i class="fas fa-cube"></i> 360厚度</h3>
+                        <p>使用：2张130膜 + 1张100膜</p>
+                        <p>收缩前：2×130 + 1×100 = 360</p>
+                        <p>总张数：3张</p>
+                        <p>收缩计算：360 - 3×8 = 336</p>
+                        <div class="result">收缩后厚度：336</div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3><i class="fas fa-cube"></i> 300厚度</h3>
+                        <p>使用：3张100膜</p>
+                        <p>收缩前：3×100 = 300</p>
+                        <p>总张数：3张</p>
+                        <p>收缩计算：300 - 3×8 = 276</p>
+                        <div class="result">收缩后厚度：276</div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3><i class="fas fa-cube"></i> 250厚度</h3>
+                        <p>使用：1张120膜 + 1张130膜</p>
+                        <p>收缩前：1×120 + 1×130 = 250</p>
+                        <p>总张数：2张</p>
+                        <p>收缩计算：250 - 2×8 = 234</p>
+                        <div class="result">收缩后厚度：234</div>
+                    </div>
+                    
+                    <div class="example-card">
+                        <h3><i class="fas fa-cube"></i> 500厚度</h3>
+                        <p>使用：3张130膜 + 1张100膜 + 1张120膜</p>
+                        <p>收缩前：3×130 + 1×100 + 1×120 = 500</p>
+                        <p>总张数：5张</p>
+                        <p>收缩计算：500 - 5×8 = 460</p>
+                        <div class="result">收缩后厚度：460</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <footer>
+            <p>© 2023 膜厚度计算器 | 设计用于膜厚度组合计算（含收缩计算）</p>
+        </footer>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const targetInput = document.getElementById('target-thickness');
+            const calculateBtn = document.getElementById('calculate-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const errorMessage = document.getElementById('error-message');
+            const resultSection = document.getElementById('result-section');
+            const result100 = document.getElementById('result-100');
+            const result120 = document.getElementById('result-120');
+            const result130 = document.getElementById('result-130');
+            const originalThickness = document.getElementById('original-thickness');
+            const shrinkThickness = document.getElementById('shrink-thickness');
+            const shrinkCalculation = document.getElementById('shrink-calculation');
+            const shrinkResult = document.getElementById('shrink-result');
+            const totalSheets = document.getElementById('total-sheets');
+            
+            // 计算按钮点击事件
+            calculateBtn.addEventListener('click', calculate);
+            
+            // 重置按钮点击事件
+            resetBtn.addEventListener('click', reset);
+            
+            // 按Enter键也可以触发计算
+            targetInput.addEventListener('keyup', function(event) {
+                if (event.key === 'Enter') {
+                    calculate();
+                }
+            });
+            
+            // 计算函数
+            function calculate() {
+                // 获取目标厚度值
+                const target = parseInt(targetInput.value);
+                
+                // 验证输入
+                if (isNaN(target) || target < 0) {
+                    showError("目标厚度必须为正整数！");
+                    return;
+                }
+                
+                // 检查目标厚度是否能被10整除
+                if (target % 10 !== 0) {
+                    showError("目标厚度必须能被10整除！");
+                    return;
+                }
+                
+                // 隐藏错误消息
+                hideError();
+                
+                // 初始化变量
+                let found = false;
+                let a_val = 0;  // 100厚度膜的张数
+                let b_val = 0;  // 120厚度膜的张数
+                let c_val = 0;  // 130厚度膜的张数
+                
+                // 优先使用130厚度的膜
+                const max_c = Math.floor(target / 130);
+                for (let c = max_c; c >= 0; c--) {
+                    let remaining = target - 130 * c;
+                    
+                    if (remaining < 0) continue;
+                    
+                    // 在剩余厚度中优先使用120厚度的膜
+                    const max_b = Math.floor(remaining / 120);
+                    for (let b = max_b; b >= 0; b--) {
+                        let remaining2 = remaining - 120 * b;
+                        
+                        if (remaining2 < 0) continue;
+                        
+                        // 检查剩余厚度是否能被100整除
+                        if (remaining2 % 100 === 0) {
+                            const a = remaining2 / 100;
+                            a_val = a;
+                            b_val = b;
+                            c_val = c;
+                            found = true;
+                            break;
+                        }
+                    }
+                    if (found) break;
+                }
+                
+                // 显示结果
+                if (found) {
+                    result100.textContent = a_val;
+                    result120.textContent = b_val;
+                    result130.textContent = c_val;
+                    
+                    // 计算总张数和厚度
+                    const total = a_val + b_val + c_val;
+                    const original = (a_val * 100) + (b_val * 120) + (c_val * 130);
+                    const shrink = original - (total * 8);
+                    
+                    originalThickness.textContent = original;
+                    shrinkThickness.textContent = shrink;
+                    
+                    // 创建收缩计算文本
+                    let calcText = `收缩前总厚度: ${original} <br>`;
+                    calcText += `总张数: ${total} <br>`;
+                    calcText += `每张膜收缩: 8 <br>`;
+                    calcText += `收缩总量: ${total} × 8 = ${total * 8}`;
+                    
+                    shrinkCalculation.innerHTML = calcText;
+                    shrinkResult.textContent = `收缩后厚度: ${shrink}`;
+                    
+                    totalSheets.textContent = `总张数：${total}`;
+                    
+                    // 显示结果部分
+                    resultSection.style.display = 'block';
+                    
+                    // 滚动到结果部分
+                    resultSection.scrollIntoView({ behavior: 'smooth' });
+                } else {
+                    showError("无法组成目标厚度，请尝试其他值！");
+                }
+            }
+            
+            // 重置函数
+            function reset() {
+                targetInput.value = '';
+                hideError();
+                resultSection.style.display = 'none';
+                targetInput.focus();
+            }
+            
+            // 显示错误消息
+            function showError(message) {
+                errorMessage.textContent = message;
+                errorMessage.style.display = 'block';
+                resultSection.style.display = 'none';
+                
+                // 添加抖动效果
+                targetInput.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    targetInput.style.animation = '';
+                }, 500);
+            }
+            
+            // 隐藏错误消息
+            function hideError() {
+                errorMessage.style.display = 'none';
+            }
+        });
+        
+        // 添加抖动动画
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+                20%, 40%, 60%, 80% { transform: translateX(8px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>
