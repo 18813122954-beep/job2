@@ -22,6 +22,7 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 .btn-orange{background:#e67e22}
 .btn-gray{background:#95a5a6}
 .btn-red{background:#e74c3c}
+.btn-light{background:#dde3ec;color:#222}
 
 /* 搜索区域 */
 .search-box{display:flex;gap:8px;margin-bottom:14px}
@@ -32,7 +33,9 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 .card-date{font-size:13px;color:#777;margin-bottom:6px}
 .card-title{font-weight:bold;margin:8px 0 4px}
 .card-text{font-size:15px;line-height:1.5;margin-bottom:6px}
-.card-del{margin-top:8px;padding:6px 12px;background:#ecf0f1;border:none;border-radius:8px;color:#c0392b}
+.card-btn-group{display:flex;gap:8px;margin-top:10px}
+.card-edit{padding:6px 12px;background:#e8f0fe;border:none;border-radius:8px;color:#2980b9}
+.card-del{padding:6px 12px;background:#ecf0f1;border:none;border-radius:8px;color:#c0392b}
 
 /* 弹窗通用样式（手机全屏弹窗） */
 .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;padding:16px;overflow-y:auto}
@@ -99,6 +102,25 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
     </div>
 </div>
 
+<!-- 编辑记录弹窗 -->
+<div class="pop" id="popEdit">
+    <div class="pop-content">
+        <h3>修改工作记录</h3>
+        <label>当日进度</label>
+        <textarea id="editProgress"></textarea>
+        <label>现存问题</label>
+        <textarea id="editProblem"></textarea>
+        <label>思路与改善方案</label>
+        <textarea id="editIdea"></textarea>
+        <input type="hidden" id="editCat">
+        <input type="hidden" id="editIndex">
+        <div class="line-btn">
+            <button class="btn-block btn-blue" id="saveEdit">确认修改</button>
+            <button class="btn-block btn-gray" id="closeEdit">取消</button>
+        </div>
+    </div>
+</div>
+
 <!-- 周报弹窗 -->
 <div class="pop" id="popWeek">
     <div class="pop-content">
@@ -156,6 +178,16 @@ const inpIdea = document.getElementById("inpIdea");
 const addBtn = document.getElementById("addBtn");
 const saveRecord = document.getElementById("saveRecord");
 const closeAdd = document.getElementById("closeAdd");
+
+//编辑弹窗
+const popEdit = document.getElementById("popEdit");
+const editProgress = document.getElementById("editProgress");
+const editProblem = document.getElementById("editProblem");
+const editIdea = document.getElementById("editIdea");
+const editCat = document.getElementById("editCat");
+const editIndex = document.getElementById("editIndex");
+const saveEdit = document.getElementById("saveEdit");
+const closeEdit = document.getElementById("closeEdit");
 
 const exportBtn = document.getElementById("exportBtn");
 
@@ -234,7 +266,7 @@ function renderList(){
     arr.forEach((item,idx)=>renderCard(activeCat,idx,item,false));
 }
 
-//渲染单条卡片
+//渲染单条卡片（增加编辑按钮）
 function renderCard(cat,idx,item,showCat){
     const div = document.createElement("div");
     div.className="card";
@@ -246,16 +278,29 @@ function renderCard(cat,idx,item,showCat){
         <div class="card-text">${highlight(item.problem||"-",searchWord)}</div>
         <div class="card-title">思路方案</div>
         <div class="card-text">${highlight(item.idea||"-",searchWord)}</div>
-        <button class="card-del" data-cat="${cat}" data-idx="${idx}">删除本条</button>
+        <div class="card-btn-group">
+            <button class="card-edit" data-cat="${cat}" data-idx="${idx}">编辑</button>
+            <button class="card-del" data-cat="${cat}" data-idx="${idx}">删除</button>
+        </div>
     `;
     listWrap.appendChild(div);
 }
 
-//删除记录
+//卡片按钮事件：编辑 / 删除
 listWrap.onclick = e=>{
-    if(e.target.classList.contains("card-del")){
-        const c = e.target.dataset.cat;
-        const i = Number(e.target.dataset.idx);
+    const target = e.target;
+    const c = target.dataset.cat;
+    const i = Number(target.dataset.idx);
+    if(target.classList.contains("card-edit")){
+        //打开编辑弹窗，回填数据
+        const data = storeData[c][i];
+        editCat.value = c;
+        editIndex.value = i;
+        editProgress.value = data.progress;
+        editProblem.value = data.problem;
+        editIdea.value = data.idea;
+        popEdit.style.display = "block";
+    }else if(target.classList.contains("card-del")){
         if(confirm("确定删除这条记录？")){
             storeData[c].splice(i,1);
             saveStorage();
@@ -263,6 +308,20 @@ listWrap.onclick = e=>{
         }
     }
 }
+
+//保存修改
+saveEdit.onclick = ()=>{
+    const c = editCat.value;
+    const i = Number(editIndex.value);
+    storeData[c][i].progress = editProgress.value.trim();
+    storeData[c][i].problem = editProblem.value.trim();
+    storeData[c][i].idea = editIdea.value.trim();
+    saveStorage();
+    popEdit.style.display="none";
+    renderList();
+    alert("修改已保存");
+}
+closeEdit.onclick = ()=>popEdit.style.display="none";
 
 //搜索
 searchBtn.onclick = ()=>{
@@ -316,10 +375,8 @@ exportBtn.onclick = ()=>{
 
 /**
  * 通用汇总生成函数
- * 将筛选出来的数据按分类聚合：工作完成、现存问题、后续计划三大块
  */
 function buildSummaryText(title, dataList) {
-    //按分类分组
     const group = {};
     cats.forEach(c=>group[c]={progress:[],problem:[],plan:[]});
 
@@ -336,17 +393,14 @@ function buildSummaryText(title, dataList) {
         if(g.progress.length === 0 && g.problem.length ===0 && g.plan.length ===0) continue;
 
         output += `【${c}】\n`;
-        //本周/本月完成工作
         if(g.progress.length>0){
             output += "▶已完成工作：\n";
             g.progress.forEach(txt=>output += `·${txt}\n`);
         }
-        //现存问题
         if(g.problem.length>0){
             output += "\n▶现存问题：\n";
             g.problem.forEach(txt=>output += `·${txt}\n`);
         }
-        //方案与后续计划
         if(g.plan.length>0){
             output += "\n▶解决方案/后续计划：\n";
             g.plan.forEach(txt=>output += `·${txt}\n`);
@@ -375,7 +429,6 @@ buildWeek.onclick = ()=>{
     const e = wEnd.value;
     if(!s||!e){alert("选择起止日期");return;}
 
-    //筛选区间内全部数据
     let matchData = [];
     cats.forEach(c=>{
         storeData[c].forEach(item=>{
