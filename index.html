@@ -3,152 +3,400 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>膜厚度计算器（收缩后区间）</title>
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<title>SOFC工作台账</title>
 <style>
-/* 保持原有样式并适配两个输入框 */
-*{margin:0;padding:0;box-sizing:border-box;font-family:'Segoe UI','Microsoft YaHei',sans-serif;}
-body{background:linear-gradient(135deg,#1a2980,#26d0ce);min-height:100vh;display:flex;justify-content:center;align-items:center;padding:20px;color:#333;}
-.container{background:rgba(255,255,255,0.95);border-radius:20px;box-shadow:0 15px 40px rgba(0,0,0,0.3);width:100%;max-width:1000px;overflow:hidden;}
-header{background:linear-gradient(120deg,#2c3e50,#1a2980);color:white;padding:30px 40px;text-align:center;}
-header h1{font-size:2.2rem;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:15px;}
-header p{font-size:1.1rem;opacity:0.9;max-width:750px;margin:0 auto;line-height:1.6;}
-.info-banner{background:#e8f4fc;padding:15px;text-align:center;border-bottom:2px solid #3498db;font-size:1.1rem;color:#2c3e50;}
-.info-banner i{color:#e74c3c;margin-right:8px;}
-.calculator{padding:30px 40px;}
-.input-group{margin-bottom:30px;}
-.input-group label{font-size:1.2rem;font-weight:600;margin-bottom:15px;color:#2c3e50;display:flex;align-items:center;gap:10px;}
-.input-container{display:flex;gap:15px;flex-wrap:wrap;}
-input{flex:1;padding:16px 20px;font-size:1.2rem;border:3px solid #3498db;border-radius:12px;outline:none;transition:all 0.3s;min-width:150px;}
-input:focus{border-color:#e74c3c;box-shadow:0 0 0 4px rgba(231,76,60,0.2);}
-button{padding:16px 30px;font-size:1.1rem;font-weight:700;border:none;border-radius:12px;cursor:pointer;transition:all 0.3s;display:flex;align-items:center;justify-content:center;gap:10px;}
-.calculate-btn{background:linear-gradient(120deg,#2ecc71,#27ae60);color:white;}
-.reset-btn{background:linear-gradient(120deg,#e74c3c,#c0392b);color:white;}
-button:hover{transform:translateY(-3px);box-shadow:0 7px 15px rgba(0,0,0,0.2);}
-.error{color:#e74c3c;font-weight:600;margin-top:15px;font-size:1rem;display:none;}
-.result-section{background:#f8f9fa;border-radius:15px;padding:30px;margin-top:30px;border:2px solid #e9ecef;display:none;}
-.result-section h2{color:#2c3e50;margin-bottom:25px;font-size:1.6rem;display:flex;align-items:center;gap:10px;}
-.solutions{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:20px;}
-.solution-card{background:white;border-radius:15px;padding:20px;box-shadow:0 7px 20px rgba(0,0,0,0.08);border-top:5px solid #3498db;}
-.solution-card h3{font-size:1.2rem;color:#2c3e50;margin-bottom:10px;}
-.solution-card p{font-size:1rem;color:#2c3e50;line-height:1.5;}
-.solution-card .highlight{color:#e74c3c;font-weight:700;}
-.examples{margin-top:40px;background:#f8f9fa;border-radius:15px;padding:30px;border:2px solid #e9ecef;}
-.examples h2{color:#2c3e50;margin-bottom:25px;font-size:1.6rem;display:flex;align-items:center;gap:10px;}
-.example-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:20px;}
-.example-card{background:white;border-radius:12px;padding:20px;box-shadow:0 5px 15px rgba(0,0,0,0.05);}
-.example-card h3{color:#e74c3c;font-size:1.1rem;margin-bottom:10px;}
-.example-card p{font-size:1rem;color:#2c3e50;margin-bottom:5px;}
-.example-card .result{font-weight:700;color:#27ae60;background:#f0f7ff;padding:8px;border-radius:8px;margin-top:5px;font-size:0.95rem;}
-footer{text-align:center;padding:20px;background:rgba(44,62,80,0.9);color:rgba(255,255,255,0.8);font-size:1rem;}
-@media(max-width:768px){.input-container{flex-direction:column;}button{width:100%;}}
+*{margin:0;padding:0;box-sizing:border-box;font-family:Microsoft Yahei}
+body{display:flex;height:100vh;background:#f4f6f8;overflow:hidden;}
+/*侧边栏 移动端适配*/
+.sidebar{width:240px;background:#2c3e50;color:#fff;padding:20px;transition:0.3s;}
+.sidebar.close{width:0;padding:0;overflow:hidden}
+.sidebar h3{margin-bottom:24px;font-size:18px}
+.nav-item{padding:12px 14px;margin:6px 0;border-radius:6px;cursor:pointer}
+.nav-item:hover{background:#34495e}
+.nav-item.active{background:#3498db}
+.toggle-bar{display:none;padding:10px;background:#2c3e50;color:#fff;text-align:center;cursor:pointer;font-size:20px}
+/*主内容区*/
+.main{flex:1;padding:16px;overflow:auto;height:100vh}
+.top-bar{display:flex;gap:8px;margin-bottom:16px;flex-wrap:wrap;align-items:center}
+.search-wrap{display:flex;gap:8px;flex:1;min-width:260px}
+#searchInput{flex:1;padding:8px 12px;border:1px solid #ddd;border-radius:5px}
+button{padding:8px 10px;border:none;border-radius:5px;cursor:pointer;color:#fff;font-size:14px}
+.btn-blue{background:#3498db}
+.btn-green{background:#27ae60}
+.btn-gray{background:#95a5a6}
+.btn-red{background:#e74c3c}
+.btn-orange{background:#e67e22}
+.card{background:#fff;padding:14px;border-radius:8px;box-shadow:0 1px 4px #00000018;margin-bottom:12px}
+textarea{width:100%;min-height:80px;padding:10px;margin:8px 0;border:1px solid #ddd;border-radius:6px;font-size:15px}
+input{padding:8px;border:1px solid #ddd;border-radius:6px;margin:4px;font-size:15px}
+.item-title{font-weight:bold;margin-bottom:6px;margin-top:10px}
+.operate{margin-top:8px;display:flex;gap:8px;flex-wrap:wrap}
+.highlight{background:#fffd88}
+.tip{color:#666;margin:8px 0;}
+.modal{background:#fff;padding:16px;border-radius:8px;margin:16px 0;border:1px solid #ddd}
+.report-area{white-space:pre-wrap;background:#f8f8f8;padding:12px;border-radius:6px;max-height:320px;overflow:auto;margin:10px 0;font-size:14px}
+
+/*手机屏幕适配*/
+@media (max-width:768px){
+    .toggle-bar{display:block}
+    .sidebar{position:absolute;height:100vh;z-index:99}
+    .main{padding:12px}
+    h2{font-size:18px}
+}
 </style>
 </head>
 <body>
-<div class="container">
-<header>
-<h1><i class="fas fa-calculator"></i> 燃料电池密封膜厚度计算器</h1>
-<p>输入收缩后的厚度区间，自动计算最优的 100、120、130 厚度膜组合（每张膜叠加后收缩 8 个单位）</p>
-</header>
-<div class="info-banner"><i class="fas fa-info-circle"></i> 每张膜收缩 8 个单位，系统将显示最多 5 个总张数最少的最佳方案</div>
-<div class="calculator">
-<div class="input-group">
-<label><i class="fas fa-bullseye"></i> 收缩后厚度区间：</label>
-<div class="input-container">
-<input type="number" id="min-thickness" placeholder="最小值 (如330)">
-<input type="number" id="max-thickness" placeholder="最大值 (如340)">
-<button class="calculate-btn" id="calculate-btn"><i class="fas fa-calculator"></i> 计算膜组合</button>
-<button class="reset-btn" id="reset-btn"><i class="fas fa-redo"></i> 重置</button>
+<div class="toggle-bar" id="toggleBtn">☰ 展开分类菜单</div>
+<div class="sidebar" id="sideBar">
+<h3>台账分类</h3>
+<div class="nav-item" data-type="电池生产">电池生产</div>
+<div class="nav-item" data-type="密封生产">密封生产</div>
+<div class="nav-item" data-type="电堆生产">电堆生产</div>
+<div class="nav-item" data-type="电池研发">电池研发</div>
+<div class="nav-item" data-type="密封研发">密封研发</div>
+<div class="nav-item" data-type="电堆研发">电堆研发</div>
 </div>
-<div class="error" id="error-message">请输入有效的区间（10的倍数，最小值小于最大值）</div>
+<div class="main">
+<div class="top-bar">
+    <div class="search-wrap">
+        <input id="searchInput" placeholder="关键词全局搜索">
+        <button class="btn-blue" id="searchBtn">搜索</button>
+        <button class="btn-gray" id="resetBtn">清除搜索</button>
+    </div>
+    <button class="btn-blue" id="addBtn">新增记录</button>
+    <button class="btn-green" id="exportBtn">导出全部台账</button>
+    <button class="btn-orange" id="weekReportBtn">生成周报</button>
+    <button class="btn-orange" id="monthReportBtn">生成月报</button>
 </div>
-<div class="result-section" id="result-section">
-<h2><i class="fas fa-chart-bar"></i> 最佳方案</h2>
-<div class="solutions" id="solutions"></div>
-</div>
-<div class="examples">
-<h2><i class="fas fa-lightbulb"></i> 计算示例</h2>
-<div class="example-grid">
-<div class="example-card">
-<h3>收缩后 330–340</h3>
-<p>使用：2×130 + 1×100</p>
-<p>收缩前：360</p>
-<p>收缩后：336</p>
-<div class="result">在区间内</div>
-</div>
-<div class="example-card">
-<h3>收缩后 270–280</h3>
-<p>使用：3×100</p>
-<p>收缩前：300</p>
-<p>收缩后：276</p>
-<div class="result">在区间内</div>
-</div>
-<div class="example-card">
-<h3>收缩后 220–230</h3>
-<p>使用：1×120 + 1×130</p>
-<p>收缩前：250</p>
-<p>收缩后：234</p>
-<div class="result">在区间内</div>
+<h2 id="curTypeName">请选择左侧分类</h2>
+<div class="tip" id="searchTip"></div>
+<div id="listWrap"></div>
+
+<!--新增记录弹窗-->
+<div id="editBox" class="modal" style="display:none;">
+<div class="item-title">当日进度</div>
+<textarea id="progress"></textarea>
+<div class="item-title">现存问题</div>
+<textarea id="problem"></textarea>
+<div class="item-title">思路与改善想法</div>
+<textarea id="idea"></textarea>
+<div class="operate">
+<button class="btn-blue" id="save">保存</button>
+<button class="btn-gray" id="cancel">取消</button>
 </div>
 </div>
+
+<!--周报弹窗-->
+<div id="weekModal" class="modal" style="display:none;">
+<h3>自动生成周报</h3>
+<div style="margin:10px 0;display:flex;flex-wrap:wrap;gap:6px;align-items:center;">
+起止日期：
+<input type="date" id="weekStart"> ~
+<input type="date" id="weekEnd">
+<button class="btn-blue" id="buildWeek">生成周报</button>
+</div>
+<div class="report-area" id="weekResult"></div>
+<div class="operate">
+<button class="btn-green" id="copyWeek">复制周报文本</button>
+<button class="btn-gray" id="closeWeek">关闭</button>
 </div>
 </div>
-<footer>© 2025 膜厚度计算器 | 设计用于膜厚度组合计算（含收缩计算）</footer>
+
+<!--月报弹窗-->
+<div id="monthModal" class="modal" style="display:none;">
+<h3>自动生成月报</h3>
+<div style="margin:10px 0;">
+选择月份：<input type="month" id="selectMonth">
+<button class="btn-blue" id="buildMonth">生成月报</button>
 </div>
+<div class="report-area" id="monthResult"></div>
+<div class="operate">
+<button class="btn-green" id="copyMonth">复制月报文本</button>
+<button class="btn-gray" id="closeMonth">关闭</button>
+</div>
+</div>
+
+</div>
+
 <script>
-const minInput=document.getElementById('min-thickness');
-const maxInput=document.getElementById('max-thickness');
-const calcBtn=document.getElementById('calculate-btn');
-const resetBtn=document.getElementById('reset-btn');
-const errorMsg=document.getElementById('error-message');
-const resultSection=document.getElementById('result-section');
-const solutionsDiv=document.getElementById('solutions');
-function showError(msg){errorMsg.textContent=msg;errorMsg.style.display='block';resultSection.style.display='none';}
-function hideError(){errorMsg.style.display='none';}
-function calculate(){
-const minVal=parseInt(minInput.value);
-const maxVal=parseInt(maxInput.value);
-if(isNaN(minVal)||isNaN(maxVal)||minVal<=0||maxVal<=0||minVal>=maxVal||minVal%10!==0||maxVal%10!==0){
-showError('请输入有效的区间（10的倍数，最小值小于最大值）');return;
+//分类
+const types = ["电池生产","密封生产","电堆生产","电池研发","密封研发","电堆研发"];
+let currentType = "";
+let searchText = "";
+
+//移动端侧边栏折叠
+const sideBar = document.getElementById("sideBar");
+const toggleBtn = document.getElementById("toggleBtn");
+toggleBtn.onclick = ()=>{
+    sideBar.classList.toggle("close");
 }
-hideError();
-let results=[];
-for(let a=0;a<=10;a++){
- for(let b=0;b<=10;b++){
-  for(let c=0;c<=10;c++){
-    let totalSheets=a+b+c;
-    if(totalSheets===0) continue;
-    let original=a*100+b*120+c*130;
-    let shrink=original-totalSheets*8;
-    if(shrink>=minVal && shrink<=maxVal){
-      results.push({a,b,c,totalSheets,original,shrink});
+
+//本地存储读取
+let data = JSON.parse(localStorage.getItem("workLogData")) || {};
+types.forEach(t=>{if(!data[t]) data[t]=[]})
+
+const navItems = document.querySelectorAll(".nav-item");
+const curTitle = document.getElementById("curTypeName");
+const listWrap = document.getElementById("listWrap");
+const addBtn = document.getElementById("addBtn");
+const editBox = document.getElementById("editBox");
+const saveBtn = document.getElementById("save");
+const cancelBtn = document.getElementById("cancel");
+const exportBtn = document.getElementById("exportBtn");
+const searchInput = document.getElementById("searchInput");
+const searchBtn = document.getElementById("searchBtn");
+const resetBtn = document.getElementById("resetBtn");
+const searchTip = document.getElementById("searchTip");
+
+//周报控件
+const weekReportBtn = document.getElementById("weekReportBtn");
+const weekModal = document.getElementById("weekModal");
+const weekStart = document.getElementById("weekStart");
+const weekEnd = document.getElementById("weekEnd");
+const buildWeek = document.getElementById("buildWeek");
+const weekResult = document.getElementById("weekResult");
+const copyWeek = document.getElementById("copyWeek");
+const closeWeek = document.getElementById("closeWeek");
+
+//月报控件
+const monthReportBtn = document.getElementById("monthReportBtn");
+const monthModal = document.getElementById("monthModal");
+const selectMonth = document.getElementById("selectMonth");
+const buildMonth = document.getElementById("buildMonth");
+const monthResult = document.getElementById("monthResult");
+const copyMonth = document.getElementById("copyMonth");
+const closeMonth = document.getElementById("closeMonth");
+
+//切换分类
+navItems.forEach(item=>{
+item.onclick=()=>{
+navItems.forEach(i=>i.classList.remove("active"));
+item.classList.add("active");
+currentType = item.dataset.type;
+curTitle.innerText = currentType;
+renderList();
+editBox.style.display="none";
+//手机点击分类后自动收起侧边栏
+if(window.innerWidth <=768){
+    sideBar.classList.add("close");
+}
+}
+})
+
+//关键词高亮
+function highlightText(text, keyword){
+    if(!keyword) return text;
+    const reg = new RegExp(`(${keyword})`,"gi");
+    return text.replace(reg,`<span class="highlight">$1</span>`);
+}
+
+//渲染列表
+function renderList(){
+listWrap.innerHTML = "";
+searchTip.innerText = "";
+
+if(searchText.trim() !== ""){
+    let resultList = [];
+    for(let cat of types){
+        data[cat].forEach((item,idx)=>{
+            const allText = (item.progress + item.problem + item.idea).toLowerCase();
+            if(allText.includes(searchText.toLowerCase())){
+                resultList.push({cat,idx,item});
+            }
+        })
     }
-  }
- }
+    if(resultList.length === 0){
+        listWrap.innerHTML="<div class='card'>未找到匹配记录</div>";
+        searchTip.innerText=`搜索关键词：${searchText}，无结果`;
+        return;
+    }
+    searchTip.innerText=`搜索关键词【${searchText}】，共找到 ${resultList.length} 条记录`;
+    resultList.forEach(row=>{
+        const div = document.createElement("div");
+        div.className="card";
+        div.innerHTML=`
+        <div><b>分类：${row.cat} | 日期：${row.item.date}</b></div>
+        <div class="item-title">进度</div>
+        <div>${highlightText(row.item.progress||"-",searchText)}</div>
+        <div class="item-title">问题</div>
+        <div>${highlightText(row.item.problem||"-",searchText)}</div>
+        <div class="item-title">想法/方案</div>
+        <div>${highlightText(row.item.idea||"-",searchText)}</div>
+        `;
+        listWrap.appendChild(div);
+    })
+    return;
 }
-results.sort((x,y)=>x.totalSheets-y.totalSheets || x.original-y.original);
-results=results.slice(0,5);
-solutionsDiv.innerHTML='';
-if(results.length===0){solutionsDiv.innerHTML='<p>未找到符合条件的组合</p>';}
-else{
- results.forEach(r=>{
-   const card=document.createElement('div');
-   card.className='solution-card';
-   card.innerHTML=`<h3>组合: 100×${r.a}, 120×${r.b}, 130×${r.c}</h3>
-   <p>总张数: <span class="highlight">${r.totalSheets}</span></p>
-   <p>收缩前厚度: ${r.original}</p>
-   <p>收缩后厚度: <span class="highlight">${r.shrink}</span></p>
-   <p>计算: ${r.original} - ${r.totalSheets}×8 = ${r.shrink}</p>`;
-   solutionsDiv.appendChild(card);
- });
+
+const arr = data[currentType] || [];
+if(arr.length===0){
+listWrap.innerHTML="<div class='card'>暂无记录，点击新增记录填写工作信息</div>";
+return;
 }
-resultSection.style.display='block';
-resultSection.scrollIntoView({behavior:'smooth'});
+arr.forEach((item,idx)=>{
+const div = document.createElement("div");
+div.className="card";
+div.innerHTML=`
+<div><b>记录日期：${item.date}</b></div>
+<div class="item-title">进度</div>
+<div>${item.progress||"-"}</div>
+<div class="item-title">问题</div>
+<div>${item.problem||"-"}</div>
+<div class="item-title">想法/方案</div>
+<div>${item.idea||"-"}</div>
+<div class="operate">
+<button class="btn-red del" data-idx="${idx}">删除本条</button>
+</div>
+`;
+listWrap.appendChild(div);
+})
+document.querySelectorAll(".del").forEach(btn=>{
+btn.onclick=()=>{
+const i = Number(btn.dataset.idx);
+if(confirm("确定删除这条记录？")){
+data[currentType].splice(i,1);
+saveData();renderList();
 }
-function reset(){minInput.value='';maxInput.value='';hideError();resultSection.style.display='none';}
-calcBtn.addEventListener('click',calculate);
-resetBtn.addEventListener('click',reset);
-[minInput,maxInput].forEach(inp=>{inp.addEventListener('keyup',e=>{if(e.key==='Enter') calculate();});});
+}
+})
+}
+
+//搜索
+searchBtn.onclick = ()=>{
+    searchText = searchInput.value.trim();
+    renderList();
+}
+searchInput.onkeydown = (e)=>{
+    if(e.key === "Enter"){
+        searchText = searchInput.value.trim();
+        renderList();
+    }
+}
+resetBtn.onclick = ()=>{
+    searchText = "";
+    searchInput.value = "";
+    renderList();
+}
+
+//新增记录
+addBtn.onclick=()=>{
+if(!currentType){alert("请先在左侧选择分类！");return}
+document.getElementById("progress").value="";
+document.getElementById("problem").value="";
+document.getElementById("idea").value="";
+editBox.style.display="block";
+weekModal.style.display="none";
+monthModal.style.display="none";
+}
+cancelBtn.onclick=()=>editBox.style.display="none";
+
+saveBtn.onclick=()=>{
+const progress = document.getElementById("progress").value.trim();
+const problem = document.getElementById("problem").value.trim();
+const idea = document.getElementById("idea").value.trim();
+data[currentType].push({
+date:new Date().toLocaleDateString(),
+progress,problem,idea
+})
+saveData();
+editBox.style.display="none";
+renderList();
+alert("保存成功！");
+}
+
+function saveData(){
+localStorage.setItem("workLogData",JSON.stringify(data));
+}
+
+//导出台账
+exportBtn.onclick=()=>{
+let text="分类\t日期\t进度\t问题\t想法\n";
+for(let t of types){
+for(let item of data[t]){
+text += `${t}\t${item.date}\t${item.progress}\t${item.problem}\t${item.idea}\n`
+}
+}
+navigator.clipboard.writeText(text);
+alert("已复制全部台账！粘贴到Excel/记事本保存");
+}
+
+// ========== 周报逻辑 ==========
+weekReportBtn.onclick = ()=>{
+    weekModal.style.display="block";
+    monthModal.style.display="none";
+    editBox.style.display="none";
+    const now=new Date();
+    weekEnd.valueAsDate = now;
+    let s = new Date();
+    s.setDate(now.getDate()-6);
+    weekStart.valueAsDate = s;
+}
+closeWeek.onclick = ()=> weekModal.style.display="none";
+
+buildWeek.onclick = ()=>{
+    const sDate = weekStart.value;
+    const eDate = weekEnd.value;
+    if(!sDate||!eDate){alert("请选择起止日期");return;}
+    let reportText = `====== 工作周报【${sDate} ~ ${eDate}】======\n`;
+    for(let cat of types){
+        const list = data[cat].filter(row=>{
+            const dStr = row.date.replace(/\//g,"-");
+            return dStr >= sDate && dStr <= eDate;
+        })
+        if(list.length===0) continue;
+        reportText += `\n【${cat}】\n`;
+        list.forEach(r=>{
+            reportText += `日期：${r.date}\n`;
+            reportText += `●进度：${r.progress}\n`;
+            reportText += `●现存问题：${r.problem}\n`;
+            reportText += `●思路方案：${r.idea}\n\n`;
+        })
+    }
+    weekResult.innerText = reportText || "该时间段暂无记录";
+}
+copyWeek.onclick=()=>{
+    navigator.clipboard.writeText(weekResult.innerText);
+    alert("周报已复制剪贴板！");
+}
+
+// ========== 月报逻辑 ==========
+monthReportBtn.onclick = ()=>{
+    monthModal.style.display="block";
+    weekModal.style.display="none";
+    editBox.style.display="none";
+    const now=new Date();
+    selectMonth.value = `${now.getFullYear()}-${String(now.getMonth()+1).padStart(2,'0')}`;
+}
+closeMonth.onclick = ()=> monthModal.style.display="none";
+
+buildMonth.onclick = ()=>{
+    const mVal = selectMonth.value;
+    if(!mVal){alert("选择月份");return;}
+    const year = mVal.split("-")[0];
+    const month = mVal.split("-")[1];
+    let reportText = `====== 工作月报【${year}年${month}月】======\n`;
+    for(let cat of types){
+        const list = data[cat].filter(row=>{
+            const dArr = row.date.split("/");
+            const dYear = dArr[0];
+            const dMonth = String(Number(dArr[1])).padStart(2,"0");
+            return dYear === year && dMonth === month;
+        })
+        if(list.length===0) continue;
+        reportText += `\n【${cat}】\n`;
+        list.forEach(r=>{
+            reportText += `日期：${r.date}\n`;
+            reportText += `●进度：${r.progress}\n`;
+            reportText += `●现存问题：${r.problem}\n`;
+            reportText += `●思路方案：${r.idea}\n\n`;
+        })
+    }
+    monthResult.innerText = reportText || "该月份暂无记录";
+}
+copyMonth.onclick=()=>{
+    navigator.clipboard.writeText(monthResult.innerText);
+    alert("月报已复制剪贴板！");
+}
 </script>
 </body>
 </html>
