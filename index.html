@@ -3,17 +3,11 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>SOFC工作台账</title>
+<title>SOFC参数试验台账</title>
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:system-ui, -apple-system, Microsoft Yahei}
 body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 .container{max-width:760px;margin:0 auto;padding:12px}
-
-/* 分类标签栏 */
-.tab-bar{display:flex;gap:6px;overflow-x:auto;padding:8px 0;margin-bottom:12px;-webkit-overflow-scrolling:touch}
-.tab-item{white-space:nowrap;padding:8px 14px;background:#e4e9f2;border-radius:20px;font-size:14px;flex-shrink:0}
-.tab-item.active{background:#2980b9;color:#fff}
-
 /* 功能按钮组 */
 .btn-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:14px}
 .btn-block{padding:11px;border:none;border-radius:10px;font-size:15px;color:#fff}
@@ -23,11 +17,9 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 .btn-gray{background:#95a5a6}
 .btn-red{background:#e74c3c}
 .btn-light{background:#dde3ec;color:#222}
-
 /* 搜索区域 */
 .search-box{display:flex;gap:8px;margin-bottom:14px}
 .search-box input{flex:1;padding:10px 12px;border:1px solid #dcdfe6;border-radius:10px;font-size:16px}
-
 /* 记录卡片 */
 .card{background:#fff;border-radius:12px;padding:14px;margin-bottom:10px;box-shadow:0 1px 5px #00000010}
 .card-date{font-size:13px;color:#777;margin-bottom:6px}
@@ -36,7 +28,6 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 .card-btn-group{display:flex;gap:8px;margin-top:10px}
 .card-edit{padding:6px 12px;background:#e8f0fe;border:none;border-radius:8px;color:#2980b9}
 .card-del{padding:6px 12px;background:#ecf0f1;border:none;border-radius:8px;color:#c0392b}
-
 /* 弹窗通用样式（手机全屏弹窗） */
 .pop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.5);display:none;padding:16px;overflow-y:auto}
 .pop-content{background:#fff;border-radius:14px;padding:16px;max-width:720px;margin:0 auto}
@@ -52,23 +43,12 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
 </head>
 <body>
 <div class="container">
-    <!-- 顶部分类标签 -->
-    <div class="tab-bar" id="tabBar">
-        <div class="tab-item" data-cat="电池生产">电池生产</div>
-        <div class="tab-item" data-cat="密封生产">密封生产</div>
-        <div class="tab-item" data-cat="电堆生产">电堆生产</div>
-        <div class="tab-item" data-cat="电池研发">电池研发</div>
-        <div class="tab-item" data-cat="密封研发">密封研发</div>
-        <div class="tab-item" data-cat="电堆研发">电堆研发</div>
-    </div>
-
     <!-- 搜索 -->
     <div class="search-box">
-        <input id="searchKey" placeholder="全局搜索进度、问题、想法">
+        <input id="searchKey" placeholder="全局搜索参数、试验目的、试验结果">
         <button class="btn-block btn-blue" style="width:90px" id="searchBtn">搜索</button>
     </div>
     <div class="tip-text" id="searchTip"></div>
-
     <!-- 功能按钮 -->
     <div class="btn-row">
         <button class="btn-block btn-blue" id="addBtn">新增记录</button>
@@ -80,39 +60,35 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
         <button class="btn-block btn-orange" id="monthBtn">生成月报</button>
         <div></div>
     </div>
-
     <!-- 记录列表 -->
     <div id="listWrap"></div>
 </div>
-
 <!-- 新增记录弹窗 -->
 <div class="pop" id="popAdd">
     <div class="pop-content">
-        <h3>新增工作记录</h3>
-        <label>当日进度</label>
-        <textarea id="inpProgress" placeholder="填写当日完成工作"></textarea>
-        <label>现存问题</label>
-        <textarea id="inpProblem" placeholder="遇到的试验/生产问题"></textarea>
-        <label>思路与改善方案</label>
-        <textarea id="inpIdea" placeholder="解决方案、后续计划"></textarea>
+        <h3>新增参数试验记录</h3>
+        <label>参数记录</label>
+        <textarea id="inpParam" placeholder="填写本次试验全部运行参数、样品规格、工况条件"></textarea>
+        <label>试验目的</label>
+        <textarea id="inpPurpose" placeholder="本次试验要验证、测试、优化的目标"></textarea>
+        <label>试验结果</label>
+        <textarea id="inpResult" placeholder="实测数据、性能表现、合格/异常结论"></textarea>
         <div class="line-btn">
             <button class="btn-block btn-blue" id="saveRecord">保存</button>
             <button class="btn-block btn-gray" id="closeAdd">取消</button>
         </div>
     </div>
 </div>
-
 <!-- 编辑记录弹窗 -->
 <div class="pop" id="popEdit">
     <div class="pop-content">
-        <h3>修改工作记录</h3>
-        <label>当日进度</label>
-        <textarea id="editProgress"></textarea>
-        <label>现存问题</label>
-        <textarea id="editProblem"></textarea>
-        <label>思路与改善方案</label>
-        <textarea id="editIdea"></textarea>
-        <input type="hidden" id="editCat">
+        <h3>修改参数试验记录</h3>
+        <label>参数记录</label>
+        <textarea id="editParam"></textarea>
+        <label>试验目的</label>
+        <textarea id="editPurpose"></textarea>
+        <label>试验结果</label>
+        <textarea id="editResult"></textarea>
         <input type="hidden" id="editIndex">
         <div class="line-btn">
             <button class="btn-block btn-blue" id="saveEdit">确认修改</button>
@@ -120,7 +96,6 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
         </div>
     </div>
 </div>
-
 <!-- 周报弹窗 -->
 <div class="pop" id="popWeek">
     <div class="pop-content">
@@ -137,7 +112,6 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
         </div>
     </div>
 </div>
-
 <!-- 月报弹窗 -->
 <div class="pop" id="popMonth">
     <div class="pop-content">
@@ -152,45 +126,32 @@ body{background:#f5f7fa;color:#222;padding-bottom:80px;min-height:100vh}
         </div>
     </div>
 </div>
-
 <script>
-//分类清单
-const cats = ["电池生产","密封生产","电堆生产","电池研发","密封研发","电堆研发"];
-let activeCat = "电池生产";
 let searchWord = "";
-
-//读取本地存储
-let storeData = JSON.parse(localStorage.getItem("sofcWorkLog")) || {};
-cats.forEach(c=>{if(!storeData[c]) storeData[c]=[]})
-
+// 单个数组存储全部记录，无分类
+let recordList = JSON.parse(localStorage.getItem("sofcParamLogSimple")) || [];
 //DOM元素
-const tabItems = document.querySelectorAll(".tab-item");
 const listWrap = document.getElementById("listWrap");
 const searchKey = document.getElementById("searchKey");
 const searchBtn = document.getElementById("searchBtn");
 const resetSearch = document.getElementById("resetSearch");
 const searchTip = document.getElementById("searchTip");
-
 const popAdd = document.getElementById("popAdd");
-const inpProgress = document.getElementById("inpProgress");
-const inpProblem = document.getElementById("inpProblem");
-const inpIdea = document.getElementById("inpIdea");
+const inpParam = document.getElementById("inpParam");
+const inpPurpose = document.getElementById("inpPurpose");
+const inpResult = document.getElementById("inpResult");
 const addBtn = document.getElementById("addBtn");
 const saveRecord = document.getElementById("saveRecord");
 const closeAdd = document.getElementById("closeAdd");
-
 //编辑弹窗
 const popEdit = document.getElementById("popEdit");
-const editProgress = document.getElementById("editProgress");
-const editProblem = document.getElementById("editProblem");
-const editIdea = document.getElementById("editIdea");
-const editCat = document.getElementById("editCat");
+const editParam = document.getElementById("editParam");
+const editPurpose = document.getElementById("editPurpose");
+const editResult = document.getElementById("editResult");
 const editIndex = document.getElementById("editIndex");
 const saveEdit = document.getElementById("saveEdit");
 const closeEdit = document.getElementById("closeEdit");
-
 const exportBtn = document.getElementById("exportBtn");
-
 //周报
 const popWeek = document.getElementById("popWeek");
 const weekBtn = document.getElementById("weekBtn");
@@ -200,7 +161,6 @@ const buildWeek = document.getElementById("buildWeek");
 const weekResult = document.getElementById("weekResult");
 const copyWeek = document.getElementById("copyWeek");
 const closeWeek = document.getElementById("closeWeek");
-
 //月报
 const popMonth = document.getElementById("popMonth");
 const monthBtn = document.getElementById("monthBtn");
@@ -210,119 +170,90 @@ const monthResult = document.getElementById("monthResult");
 const copyMonth = document.getElementById("copyMonth");
 const closeMonth = document.getElementById("closeMonth");
 
-//切换分类
-tabItems.forEach(t=>{
-    t.onclick=()=>{
-        tabItems.forEach(ti=>ti.classList.remove("active"));
-        t.classList.add("active");
-        activeCat = t.dataset.cat;
-        searchWord = "";
-        searchKey.value = "";
-        renderList();
-    }
-})
-document.querySelector(`.tab-item[data-cat="${activeCat}"]`).classList.add("active");
-
-//保存数据
+//保存本地存储
 function saveStorage(){
-    localStorage.setItem("sofcWorkLog",JSON.stringify(storeData));
+    localStorage.setItem("sofcParamLogSimple",JSON.stringify(recordList));
 }
-
 //文字高亮
 function highlight(str,key){
     if(!key) return str;
     return str.replace(new RegExp(`(${key})`,"gi"),`<span class="highlight">$1</span>`);
 }
-
-//渲染列表
+//渲染列表（数组天然新记录在上，无需排序）
 function renderList(){
     listWrap.innerHTML = "";
     searchTip.innerText = "";
-    //搜索模式：全分类检索
+    //搜索模式
     if(searchWord.trim()!=""){
-        let result = [];
-        cats.forEach(c=>{
-            storeData[c].forEach((item,idx)=>{
-                const allTxt = (item.progress+item.problem+item.idea).toLowerCase();
-                if(allTxt.includes(searchWord.toLowerCase())){
-                    result.push({cat:c,idx,item})
-                }
-            })
+        let result = recordList.filter(item=>{
+            const allTxt = (item.param+item.purpose+item.result).toLowerCase();
+            return allTxt.includes(searchWord.toLowerCase());
         })
         if(result.length===0){
             listWrap.innerHTML = `<div class="card">未搜索到匹配记录</div>`;
             return;
         }
         searchTip.innerText = `搜索【${searchWord}】共找到${result.length}条`;
-        result.forEach(row=>renderCard(row.cat,row.idx,row.item,true));
+        result.forEach((item,idx)=>renderCard(idx,item));
         return;
     }
-    //正常浏览当前分类
-    const arr = storeData[activeCat];
-    if(arr.length===0){
+    //正常展示，数组头部为最新记录
+    if(recordList.length===0){
         listWrap.innerHTML = `<div class="card">暂无记录，请点击新增记录</div>`;
         return;
     }
-    arr.forEach((item,idx)=>renderCard(activeCat,idx,item,false));
+    recordList.forEach((item,idx)=>renderCard(idx,item));
 }
-
-//渲染单条卡片（增加编辑按钮）
-function renderCard(cat,idx,item,showCat){
+//渲染单条卡片
+function renderCard(idx,item){
     const div = document.createElement("div");
     div.className="card";
     div.innerHTML = `
-        <div class="card-date">${showCat?"【"+cat+"】":""}${item.date}</div>
-        <div class="card-title">进度</div>
-        <div class="card-text">${highlight(item.progress||"-",searchWord)}</div>
-        <div class="card-title">问题</div>
-        <div class="card-text">${highlight(item.problem||"-",searchWord)}</div>
-        <div class="card-title">思路方案</div>
-        <div class="card-text">${highlight(item.idea||"-",searchWord)}</div>
+        <div class="card-date">${item.date}</div>
+        <div class="card-title">参数记录</div>
+        <div class="card-text">${highlight(item.param||"-",searchWord)}</div>
+        <div class="card-title">试验目的</div>
+        <div class="card-text">${highlight(item.purpose||"-",searchWord)}</div>
+        <div class="card-title">试验结果</div>
+        <div class="card-text">${highlight(item.result||"-",searchWord)}</div>
         <div class="card-btn-group">
-            <button class="card-edit" data-cat="${cat}" data-idx="${idx}">编辑</button>
-            <button class="card-del" data-cat="${cat}" data-idx="${idx}">删除</button>
+            <button class="card-edit" data-idx="${idx}">编辑</button>
+            <button class="card-del" data-idx="${idx}">删除</button>
         </div>
     `;
     listWrap.appendChild(div);
 }
-
-//卡片按钮事件：编辑 / 删除
+//卡片编辑删除事件
 listWrap.onclick = e=>{
     const target = e.target;
-    const c = target.dataset.cat;
-    const i = Number(target.dataset.idx);
+    const idx = Number(target.dataset.idx);
     if(target.classList.contains("card-edit")){
-        //打开编辑弹窗，回填数据
-        const data = storeData[c][i];
-        editCat.value = c;
-        editIndex.value = i;
-        editProgress.value = data.progress;
-        editProblem.value = data.problem;
-        editIdea.value = data.idea;
+        const data = recordList[idx];
+        editIndex.value = idx;
+        editParam.value = data.param;
+        editPurpose.value = data.purpose;
+        editResult.value = data.result;
         popEdit.style.display = "block";
     }else if(target.classList.contains("card-del")){
         if(confirm("确定删除这条记录？")){
-            storeData[c].splice(i,1);
+            recordList.splice(idx,1);
             saveStorage();
             renderList();
         }
     }
 }
-
 //保存修改
 saveEdit.onclick = ()=>{
-    const c = editCat.value;
     const i = Number(editIndex.value);
-    storeData[c][i].progress = editProgress.value.trim();
-    storeData[c][i].problem = editProblem.value.trim();
-    storeData[c][i].idea = editIdea.value.trim();
+    recordList[i].param = editParam.value.trim();
+    recordList[i].purpose = editPurpose.value.trim();
+    recordList[i].result = editResult.value.trim();
     saveStorage();
     popEdit.style.display="none";
     renderList();
     alert("修改已保存");
 }
 closeEdit.onclick = ()=>popEdit.style.display="none";
-
 //搜索
 searchBtn.onclick = ()=>{
     searchWord = searchKey.value.trim();
@@ -339,82 +270,52 @@ resetSearch.onclick = ()=>{
     searchKey.value = "";
     renderList();
 }
-
 //新增弹窗
 addBtn.onclick = ()=>{
     popAdd.style.display="block";
-    inpProgress.value = "";
-    inpProblem.value = "";
-    inpIdea.value = "";
+    inpParam.value = "";
+    inpPurpose.value = "";
+    inpResult.value = "";
 }
 closeAdd.onclick = ()=>popAdd.style.display="none";
-
 saveRecord.onclick = ()=>{
-    const p = inpProgress.value.trim();
-    const pr = inpProblem.value.trim();
-    const id = inpIdea.value.trim();
+    const param = inpParam.value.trim();
+    const purpose = inpPurpose.value.trim();
+    const result = inpResult.value.trim();
     const today = new Date().toLocaleDateString();
-    storeData[activeCat].push({date:today,progress:p,problem:pr,idea:id});
+    // unshift插入数组头部，新增记录直接置顶
+    recordList.unshift({date:today, param, purpose, result});
     saveStorage();
     popAdd.style.display="none";
     renderList();
-    alert("保存成功");
+    alert("保存成功，记录已置顶");
 }
-
 //导出台账
 exportBtn.onclick = ()=>{
-    let text = "分类\t日期\t进度\t问题\t想法\n";
-    cats.forEach(c=>{
-        storeData[c].forEach(row=>{
-            text += `${c}\t${row.date}\t${row.progress}\t${row.problem}\t${row.idea}\n`
-        })
+    let text = "日期\t参数记录\t试验目的\t试验结果\n";
+    recordList.forEach(row=>{
+        text += `${row.date}\t${row.param}\t${row.purpose}\t${row.result}\n`
     })
     navigator.clipboard.writeText(text);
-    alert("全部台账已复制！");
+    alert("全部台账已复制！粘贴到Excel即可");
 }
-
-/**
- * 通用汇总生成函数
- */
+//汇总文本生成
 function buildSummaryText(title, dataList) {
-    const group = {};
-    cats.forEach(c=>group[c]={progress:[],problem:[],plan:[]});
-
-    dataList.forEach(row=>{
-        const cat = row.cat;
-        if(row.item.progress.trim()) group[cat].progress.push(row.item.progress.trim());
-        if(row.item.problem.trim()) group[cat].problem.push(row.item.problem.trim());
-        if(row.item.idea.trim()) group[cat].plan.push(row.item.idea.trim());
-    });
-
     let output = `${title}\n\n`;
-    for(let c of cats){
-        const g = group[c];
-        if(g.progress.length === 0 && g.problem.length ===0 && g.plan.length ===0) continue;
-
-        output += `【${c}】\n`;
-        if(g.progress.length>0){
-            output += "▶已完成工作：\n";
-            g.progress.forEach(txt=>output += `·${txt}\n`);
-        }
-        if(g.problem.length>0){
-            output += "\n▶现存问题：\n";
-            g.problem.forEach(txt=>output += `·${txt}\n`);
-        }
-        if(g.plan.length>0){
-            output += "\n▶解决方案/后续计划：\n";
-            g.plan.forEach(txt=>output += `·${txt}\n`);
-        }
-        output += "\n";
+    if(dataList.length === 0){
+        output += "选定时间段内无试验记录";
+        return output;
     }
-
-    if(output.trim() === `${title}`){
-        output += "选定时间段内无工作记录";
-    }
+    dataList.forEach(item=>{
+        output += `【${item.date}】\n`;
+        if(item.param.trim()) output += "▶试验参数：\n·"+item.param+"\n";
+        if(item.purpose.trim()) output += "\n▶试验目的：\n·"+item.purpose+"\n";
+        if(item.result.trim()) output += "\n▶试验结果：\n·"+item.result+"\n";
+        output += "\n——————————————\n\n";
+    })
     return output;
 }
-
-//====周报汇总逻辑====
+//周报
 weekBtn.onclick = ()=>{
     popWeek.style.display="block";
     const now=new Date();
@@ -427,26 +328,19 @@ closeWeek.onclick = ()=>popWeek.style.display="none";
 buildWeek.onclick = ()=>{
     const s = wStart.value;
     const e = wEnd.value;
-    if(!s||!e){alert("选择起止日期");return;}
-
-    let matchData = [];
-    cats.forEach(c=>{
-        storeData[c].forEach(item=>{
-            const dStr = item.date.replace(/\//g,"-");
-            if(dStr >= s && dStr <= e){
-                matchData.push({cat:c,item})
-            }
-        })
+    if(!s||!e){alert("请选择起止日期");return;}
+    let matchData = recordList.filter(item=>{
+        const dStr = item.date.replace(/\//g,"-");
+        return dStr >= s && dStr <= e;
     });
-    const title = `======工作周报【${s} ~ ${e}】======`;
+    const title = `======SOFC试验周报【${s} ~ ${e}】======`;
     weekResult.value = buildSummaryText(title, matchData);
 }
 copyWeek.onclick = ()=>{
     navigator.clipboard.writeText(weekResult.value);
     alert("周报复制完成");
 }
-
-//====月报汇总逻辑====
+//月报
 monthBtn.onclick = ()=>{
     popMonth.style.display="block";
     const now=new Date();
@@ -457,24 +351,17 @@ buildMonth.onclick = ()=>{
     const val = selMonth.value;
     if(!val) return;
     const [y,m] = val.split("-");
-
-    let matchData = [];
-    cats.forEach(c=>{
-        storeData[c].forEach(item=>{
-            const dArr = item.date.split("/");
-            if(dArr[0]==y && String(Number(dArr[1])).padStart(2,"0")==m){
-                matchData.push({cat:c,item})
-            }
-        })
+    let matchData = recordList.filter(item=>{
+        const dArr = item.date.split("/");
+        return dArr[0]==y && String(Number(dArr[1])).padStart(2,"0")==m;
     });
-    const title = `======工作月报【${y}年${m}月】======`;
+    const title = `======SOFC试验月报【${y}年${m}月】======`;
     monthResult.value = buildSummaryText(title, matchData);
 }
 copyMonth.onclick = ()=>{
     navigator.clipboard.writeText(monthResult.value);
     alert("月报复制完成");
 }
-
 //初始化渲染
 renderList();
 </script>
